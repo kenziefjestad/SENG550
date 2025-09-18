@@ -69,6 +69,79 @@ def insert_given_date(conn):
                 conn.close()
                 print("Cursor and connection closed.")
 
+def insert_new_customer(name, email, phone, address, conn):
+    query = f"INSERT INTO customers (name, email, phone, address) VALUES ('{name}', '{email}', '{phone}', '{address}');"
+    if conn:
+        cursor = create_cursor(conn)
+        if cursor:
+            try:
+                cursor.execute(query)
+                print(cursor.fetchone())
+                conn.commit()
+                print("New customer inserted successfully.")
+            except Exception as e:
+                print(f"Error inserting new customer: {e}")
+                conn.rollback()
+            finally:
+                print(cursor.fetchone())
+                id = cursor.fetchone()["id"]
+                cursor.close()
+                if id:
+                    return id
+
+def insert_new_order(customerID, orderDate, totalAmount, productID, productCategory, productName, conn):
+    query = f"INSERT INTO orders (customer_id, order_date, total_amount, product_id, product_category, product_name) VALUES ({customerID}, '{orderDate}', {totalAmount}, {productID}, '{productCategory}', '{productName}');"
+    if conn:
+        cursor = create_cursor(conn)
+        if cursor:
+            try:
+                cursor.execute(query)
+                conn.commit()
+                print("New order inserted successfully.")
+            except Exception as e:
+                print(f"Error inserting new order: {e}")
+                conn.rollback()
+            finally:
+                cursor.close()
+                id = cursor.fetchone()["id"]
+                if id:
+                    return id
+
+def insert_new_delivery(orderID, deliveryDate, deliveryStatus, conn):
+    query = f"INSERT INTO deliveries (order_id, delivery_date, status) VALUES ({orderID}, '{deliveryDate}', '{deliveryStatus}');"
+    if conn:
+        cursor = create_cursor(conn)
+        if cursor:
+            try:
+                cursor.execute(query)
+                conn.commit()
+                print("New delivery inserted successfully.")
+            except Exception as e:
+                print(f"Error inserting new delivery: {e}")
+                conn.rollback()
+            finally:
+                id = cursor.fetchone()["id"]
+                cursor.close()
+                if id:
+                    return id
+
+def update_delivery_status(orderID, new_status, conn):
+    query = f"UPDATE deliveries SET status = '{new_status}' WHERE delivery_id = {orderID};"
+    if conn:
+        cursor = create_cursor(conn)
+        if cursor:
+            try:
+                cursor.execute(query)
+                conn.commit()
+                print("Delivery status updated successfully.")
+            except Exception as e:
+                print(f"Error updating delivery status: {e}")
+                conn.rollback()
+            finally:
+                id = cursor.fetchone()["id"]
+                cursor.close()
+                if id:
+                    return id
 
 if __name__ == "__main__":
     db_name = "storedb"
@@ -77,6 +150,16 @@ if __name__ == "__main__":
     
     conn = connect_to_db(db_name, user, password)
     if conn:
+        # part 2
         # insert_given_date(conn)
+
+        # part 3
+        inserted_customer_id = insert_new_customer('Liam Nelson', 'liam.nelson@example.com', '555-2468', '111 Elm Street', conn)
+        inserted_order_id = insert_new_order(inserted_customer_id, '2025-06-01', '180.00', '116', 'Electronics', 'Bluetooth Speaker', conn)
+        inserted_delivery_id = insert_new_delivery(inserted_order_id, '2025-06-03', 'Pending', conn)
+        update_delivery_status(inserted_delivery_id, 'Shipped', conn)
+        insert_new_customer('John Cena', 'john.cena@example.com', '555-0000', '123 Main St', conn)
+        update_delivery_status(3, 'Delivered', conn)
+
         conn.close()
         print("Connection closed.")
