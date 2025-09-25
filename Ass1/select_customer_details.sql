@@ -1,0 +1,1 @@
+SELECT name, email, phone, address FROM customers;
