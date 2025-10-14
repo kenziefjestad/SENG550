@@ -70,7 +70,7 @@ def insert_given_date(conn):
                 print("Cursor and connection closed.")
 
 def insert_new_customer(name, email, phone, address, conn):
-    query = f"INSERT INTO customers (name, email, phone, address) VALUES ('{name}', '{email}', '{phone}', '{address}');"
+    query = f"INSERT INTO customers (name, email, phone, address) VALUES ('{name}', '{email}', '{phone}', '{address}') RETURNING id;"
     if conn:
         cursor = create_cursor(conn)
         if cursor:
@@ -84,13 +84,13 @@ def insert_new_customer(name, email, phone, address, conn):
                 conn.rollback()
             finally:
                 # print(cursor.fetchone())
-                # id = cursor.fetchone()["id"]
+                id = cursor.fetchone()[0]
                 cursor.close()
                 if id:
                     return id
 
 def insert_new_order(customerID, orderDate, totalAmount, productID, productCategory, productName, conn):
-    query = f"INSERT INTO orders (customer_id, order_date, total_amount, product_id, product_category, product_name) VALUES ({customerID}, '{orderDate}', {totalAmount}, {productID}, '{productCategory}', '{productName}');"
+    query = f"INSERT INTO orders (customer_id, order_date, total_amount, product_id, product_category, product_name) VALUES ({customerID}, '{orderDate}', {totalAmount}, {productID}, '{productCategory}', '{productName}') RETURNING order_id;"
     if conn:
         cursor = create_cursor(conn)
         if cursor:
@@ -103,12 +103,12 @@ def insert_new_order(customerID, orderDate, totalAmount, productID, productCateg
                 conn.rollback()
             finally:
                 cursor.close()
-                # id = cursor.fetchone()["id"]
+                id = cursor.fetchone()[0]
                 if id:
                     return id
 
 def insert_new_delivery(orderID, deliveryDate, deliveryStatus, conn):
-    query = f"INSERT INTO deliveries (order_id, delivery_date, status) VALUES ({orderID}, '{deliveryDate}', '{deliveryStatus}');"
+    query = f"INSERT INTO deliveries (order_id, delivery_date, status) VALUES ({orderID}, '{deliveryDate}', '{deliveryStatus}') RETURNING delivery_id;"
     if conn:
         cursor = create_cursor(conn)
         if cursor:
@@ -120,7 +120,7 @@ def insert_new_delivery(orderID, deliveryDate, deliveryStatus, conn):
                 print(f"Error inserting new delivery: {e}")
                 conn.rollback()
             finally:
-                # id = cursor.fetchone()["id"]
+                id = cursor.fetchone()[0]
                 cursor.close()
                 if id:
                     return id
@@ -154,10 +154,10 @@ if __name__ == "__main__":
         # insert_given_date(conn)
 
         # part 3
-        # insert_new_customer('Liam Nelson', 'liam.nelson@example.com', '555-2468', '111 Elm Street', conn)
-        # insert_new_order(11, '2025-06-01', '180.00', '116', 'Electronics', 'Bluetooth Speaker', conn)
-        # insert_new_delivery(16, '2025-06-03', 'Pending', conn)
-        # update_delivery_status(16, 'Shipped', conn)
+        # new_customer_id = insert_new_customer('Liam Nelson', 'liam.nelson@example.com', '555-2468', '111 Elm Street', conn)
+        # new_order_id = insert_new_order(new_customer_id, '2025-06-01', '180.00', '116', 'Electronics', 'Bluetooth Speaker', conn)
+        # new_delivery_id = insert_new_delivery(new_order_id, '2025-06-03', 'Pending', conn)
+        # update_delivery_status(new_delivery_id, 'Shipped', conn)
         # insert_new_customer('John Cena', 'john.cena@example.com', '555-0000', '123 Main St', conn)
         # update_delivery_status(3, 'Delivered', conn)
 
